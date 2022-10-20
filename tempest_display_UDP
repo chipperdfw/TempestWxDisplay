@@ -7,6 +7,7 @@
  *
  * Ver 0.0.1 : Basic capture of local UDP Data from Tempest and basic display on 2.8" TFT ILI9341 Display 
  * Ver 0.0.4 : Ring & Bar graphs for Temp & Humidity 
+ * Ver 0.0.5 : Color code voltage and adjust font size for 100+ degrees
  * 
  * To-Do:
  * Wind Gusts - formatting
@@ -23,8 +24,8 @@
 
   
 // Set WiFi credentials
-const char ssid[] = "XXX";
-const char pass[] = "xxx";
+const char ssid[] = "COKERCOMM2";
+const char pass[] = "fe55f11356ab966b5efdbb2884";
 #define UDP_PORT 50222
  
 // UDP
@@ -46,9 +47,7 @@ String windDir[] = {"NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW
 // MOSI(DIN) ---> NodeMCU pin D7 (GPIO13)
 
    Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-// define some RGB 585 colors
-   #define ORANGE   0xFBE0
-  // Assign human-readable names to common 16-bit color values:
+  // Assign human-readable names to common 16-bit RGB 585 color values:
   #define BLACK       0x0000
   #define RED         0xF800
   #define GREEN       0x07E0
@@ -56,6 +55,7 @@ String windDir[] = {"NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW
   #define CYAN        0x07FF
   #define MAGENTA     0xF81F
   #define YELLOW      0xFFE0
+  #define ORANGE      0xFBE0
   #define WHITE       0xFFFF
   #define GREY        0x5AEB
 
@@ -185,7 +185,7 @@ void loop() {
       int luxNow = int(doc["obs"][0][9]);
       float UVNow = doc["obs"][0][10];
       int solarNow = int(doc["obs"][0][11]);
-      float rainNow = 60 * float(doc["obs"][0][12]);
+      float rainNow = (60 * float(doc["obs"][0][12]))/25.4; // Convert mm/min to inches/hour
       int PrecipType = doc["obs"][0][13];
 
       float dewpointNow = tempNow - ((100 - humidityNow)/5); // Td = T - ((100 - RH)/5.)
@@ -209,17 +209,28 @@ void loop() {
       Serial.print("Packet: ");      Serial.println(packet);
     }
     if (strcmp(type, "evt_strike") == 0) {
+      int strike_distance = int(0.621371 * float(doc["evt"][1]));  // convert km to miles
       Serial.print("Type: ");    Serial.println(type);
-      Serial.print("Packet: ");      Serial.println(packet);
+      Serial.print("Distance: ");      Serial.println(strike_distance);
     }
     if (strcmp(type, "device_status") == 0) {
       Serial.print("Type: ");    Serial.println(type);
       //Serial.print("Packet: ");      Serial.println(packet);
       String stationId = doc["serial_number"];
       String voltage = doc["voltage"];
+      int voltColor = WHITE;
+      if (float(doc["voltage"])<2.445) {
+        voltColor = YELLOW;        
+      }
+      if (float(doc["voltage"])<=2.39) {
+        voltColor = ORANGE;        
+      }
+      if (float(doc["voltage"])<=2.355) {
+        voltColor = RED;        
+      }
       tft.fillRect(155,230,120,10,0x0000);  // overwrite station & voltage
       display_item(155, 230, stationId, WHITE, 1);
-      display_item(225, 230, ("V:" + voltage), WHITE, 1);
+      display_item(225, 230, ("V:" + voltage), voltColor, 1);
     }
     if (strcmp(type, "hub_status") == 0) {
       Serial.print("Type: ");    Serial.println(type);
@@ -297,7 +308,7 @@ void Display_Rain(float rainNow, int PrecipType) {
   //if (PrecipType == 0) tft.fillRoundRect(155, 197, 70, 30, 10, BLACK);
   //else tft.fillRoundRect(155, 197, 70, 30, 10, BLUE); // Clear/set the background
   tft.drawRoundRect(155, 197, 70, 30, 10, YELLOW); // (x0,y0,w,h,r,color)
-  display_item(180, 200, "RAIN", WHITE, 1);
+  display_item(170, 200, "PRECIP", WHITE, 1);
   display_item(165, 215, (String(rainNow)), YELLOW, 1);
   // fill for rain_event status
 }
@@ -527,4 +538,3 @@ unsigned int rainbow(byte value)
   }
   return (red << 11) + (green << 5) + blue;
 }
-
