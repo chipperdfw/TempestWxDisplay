@@ -16,3 +16,12 @@ Version History Description:
  * Forecast - top corners of temp?
 
 
+Wiring the display to the ESP8266 WEMOS is simple.  You can use this as a guide:
+https://thesolaruniverse.wordpress.com/2021/05/02/wiring-an-ili9341-spi-tft-display-with-esp8266-based-microcontroller-boards-nodemcu-and-wemos-d1-mini/
+
+I also printed a nice case for the Display and ESP8266.  You can find the case here:
+https://www.thingiverse.com/thing:3461768/files
+
+
+I use the Arduino IDE to upload directly to the ESP8266.  You can use the code as-is but you must add your WiFi Credentials to the WiFi_Credentials.h file so that the ESP8266 will connect to your WiFi network and find your Tempest hub.
+
