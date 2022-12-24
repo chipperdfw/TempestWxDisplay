@@ -1,6 +1,14 @@
 # TempestWxDisplay
 Arduino/TFT INI9341 Display for local Tempest Weather Station
 
+This sketch sniffs the local LAN (where the Tempest hub is connected) for the UDP packets containing the raw weather data from the Tempest.  Rather than using the Tempest station page (on tempestwx.com), you can view your local display for the current weather info.  The information on the display is updated at the same frequency as the UDP packets (usually Wind every 3 secs and other weather every minute).
+
+The current display looks like this:
+
+<image src="https://user-images.githubusercontent.com/101214995/209420422-6c1d8c93-b198-45ed-a663-33c2848cbdfd.png" width="500"/>
+
+
+
 Uses the Wemos D1 Mini Pro ESP8266 and a ILI9341 TFT display to show real-time data from a Tempest Weather Station on the same LAN.  It sniffs the UDP Packets sent by the Tempest and translates the data to the TFT display.  It does not require an internet connection or use the Tempest API feed.
 
 Version History Description:
